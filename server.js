@@ -1,7 +1,6 @@
-
 const express = require("express");
 const cors = require("cors");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Secure via env variable
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Load from environment variable
 
 const app = express();
 app.use(cors());
@@ -18,7 +17,7 @@ app.post("/create-checkout-session", async (req, res) => {
           name: item.name,
           description: `Spice: ${item.spice || 'N/A'} | Note: ${item.note || 'None'}`
         },
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round(item.price * 100), // price in cents
       },
       quantity: item.qty
     }));
@@ -28,16 +27,16 @@ app.post("/create-checkout-session", async (req, res) => {
       customer_email: customer.email,
       line_items,
       mode: 'payment',
-      success_url: "https://your-site.com/success.html",
-      cancel_url: "https://your-site.com/checkout.html"
+      success_url: "https://thetandooriadda.netlify.app/thankyou.html",
+      cancel_url: "https://thetandooriadda.netlify.app/checkout.html"
     });
 
     res.json({ id: session.id });
   } catch (err) {
-    console.error(err);
+    console.error("Stripe Checkout Error:", err);
     res.status(500).json({ error: "Checkout failed." });
   }
 });
 
 const PORT = process.env.PORT || 4242;
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
